@@ -12,16 +12,22 @@
   --fd:'Fredoka','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;--fn:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
   --spring:cubic-bezier(.34,1.56,.64,1);--smooth:cubic-bezier(.22,1,.36,1)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{margin:0;overflow:hidden;background:#0d4f2e}
+html,body{margin:0;height:100%;overflow:hidden;background:#5E9E62}
 body{font-family:var(--fn);color:var(--ink);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
 button{font-family:inherit;border:0;cursor:pointer;color:inherit;background:none;-webkit-tap-highlight-color:transparent}
 input{font-family:inherit;-webkit-user-select:text;user-select:text}
 
 /* ---------- frame: lebar 100%, tinggi maks 600px ---------- */
-#app{position:relative;width:100%;height:min(177.78vw,600px);overflow:hidden;
-  background:radial-gradient(90% 70% at 50% 30%,#1c7a47 0%,#0f5a34 60%,#0a4428 100%)}
-#app::before{content:'';position:absolute;inset:0;opacity:.12;background-image:radial-gradient(#fff 1.4px,transparent 1.8px);background-size:22px 22px}
-#stage{position:absolute;left:50%;top:50%;width:360px;height:640px;overflow:hidden;transform:translate(-50%,-50%);transform-origin:50% 50%;background:#BFE8F5}
+#app{position:relative;width:100%;height:min(177.78vw,600px);overflow:hidden;background:#5E9E62}
+/* latar dunia di luar area inti 600px: menyambung dengan latar permainan */
+#world{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#world .wl{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+#world .wl.on{opacity:1}
+#world svg{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#wRays{position:absolute;width:10px;height:10px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.07) 0 10deg,transparent 10deg 20deg);animation:spin 70s linear infinite}
+#wDim{position:absolute;inset:0;background:rgba(10,40,24,.55);opacity:0;transition:opacity .35s;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+#app.dim #wDim{opacity:1}
+#stage{position:absolute;left:50%;top:50%;width:360px;height:640px;overflow:hidden;transform:translate(-50%,-50%);transform-origin:50% 50%;background:transparent;z-index:1}
 #stage.framed{border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
 .layer{position:absolute;inset:0}
 #scene{z-index:1}
@@ -169,7 +175,7 @@ input{font-family:inherit;-webkit-user-select:text;user-select:text}
 .caption small{display:block;font:800 10px var(--fn);letter-spacing:1.5px;opacity:.7}
 
 /* start */
-.start{position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#2FA766 0%,#17804A 55%,#0F6B3E 100%)}
+.start{position:absolute;inset:0;overflow:hidden;background:transparent}
 .start .rays{position:absolute;left:50%;top:240px;width:900px;height:900px;margin:-450px;background:repeating-conic-gradient(rgba(255,255,255,.07) 0 10deg,transparent 10deg 20deg);animation:spin 70s linear infinite}
 .start .fl{position:absolute;font-size:22px;opacity:.35;animation:float 4s ease-in-out infinite alternate}
 @keyframes float{from{translate:0 0;rotate:-8deg}to{translate:0 -10px;rotate:8deg}}
@@ -266,6 +272,7 @@ input{font-family:inherit;-webkit-user-select:text;user-select:text}
 </head>
 <body>
 <div id="app">
+ <div id="world"><div class="wl on" id="wStart"><svg id="wsS"></svg><div id="wRays"></div></div><div class="wl" id="wGarden"><svg id="wsG"></svg></div><div id="wDim"></div></div>
  <div id="stage">
   <div id="scene" class="layer"></div>
   <div id="hud" class="hide">
@@ -312,10 +319,39 @@ function fit(force){
   if(!force&&isTyping())return;
   const W=document.documentElement.clientWidth||innerWidth;
   const H=Math.max(300,Math.min(600,Math.round(W*16/9),screenH()-4));
-  if(Math.abs(H-lastH)>=2){lastH=H;app.style.height=H+'px';growFrame(H)}
+  if(Math.abs(H-lastH)>=2){lastH=H;growFrame(H)}
+  const AH=Math.max(H,Math.round(innerHeight||document.documentElement.clientHeight||H));
+  app.style.height=AH+'px';
   const s=Math.min(W/360,H/640);SCALE=s;
   stage.style.transform=`translate(-50%,-50%) scale(${s})`;
-  stage.classList.toggle('framed',(W-360*s>8)||(H-640*s>8));
+  drawWorld(W,AH,s);
+}
+/* Latar dunia: digambar dalam koordinat yang sama dengan panggung 360x640, lalu diperluas ke seluruh layar */
+let worldKey='';
+function setWorld(m){$('#wStart').classList.toggle('on',m==='start');$('#wGarden').classList.toggle('on',m==='garden')}
+function drawWorld(W,AH,s){
+  const key=W+'x'+AH+'@'+s.toFixed(4);if(key===worldKey)return;worldKey=key;
+  const L=(W-360*s)/2,T=(AH-640*s)/2,x0=-L/s,y0=-T/s,w=W/s,h=AH/s,x1=x0+w,y1=y0+h,vb=`${x0} ${y0} ${w} ${h}`;
+  const r=$('#wRays'),R=Math.hypot(W,AH)*2.2;
+  r.style.width=r.style.height=R+'px';r.style.left=(L+180*s-R/2)+'px';r.style.top=(T+240*s-R/2)+'px';
+  $('#wsS').setAttribute('viewBox',vb);$('#wsS').setAttribute('preserveAspectRatio','none');
+  $('#wsS').innerHTML=`<defs><linearGradient id="wgS" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="640"><stop offset="0" stop-color="#2FA766"/><stop offset=".55" stop-color="#17804A"/><stop offset="1" stop-color="#0F6B3E"/></linearGradient></defs><rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="url(#wgS)"/>`;
+  const k0=Math.floor(x0/360),k1=Math.floor(x1/360);let hills='';
+  for(let k=k0;k<=k1;k++){const tr=k%2===0?`translate(${k*360} 0)`:`translate(${(k+1)*360} 0) scale(-1 1)`;
+    hills+=`<g transform="${tr}"><path d="M0 220 Q60 170 130 205 T260 196 T360 200 V270 H0Z" fill="#B7E2A4"/><path d="M0 238 Q90 205 180 232 T360 226 V280 H0Z" fill="#9BD487"/></g>`}
+  let posts='';for(let i=Math.floor((x0-11)/28);i<=Math.ceil((x1-4)/28);i++)posts+=`<rect x="${4+i*28}" y="226" width="7" height="30" rx="2"/>`;
+  let tufts='';for(let i=Math.floor((x0-10)/17);i<=Math.ceil((x1-4)/17);i++)tufts+=`<path d="M${i*17+4} 258 l3 -9 l3 9z"/>`;
+  let rows='';for(let y=300;y<y1;y+=40)rows+=`<rect x="${x0}" y="${y}" width="${w}" height="9" rx="4"/>`;
+  const CL=[[-70,40,1],[400,70,.9],[-30,-70,1.1],[290,-120,1],[120,-210,.9],[-160,-170,1],[480,-40,1.1],[560,140,.8],[-240,110,.9],[200,-320,1],[-120,-300,.9],[460,-250,1]];
+  const clouds=CL.filter(c=>c[1]<200).map(([cx,cy,k])=>`<g transform="translate(${cx} ${cy}) scale(${k})" fill="#fff" opacity=".85"><rect x="-26" y="-6" width="56" height="20" rx="10"/><circle cx="-6" cy="-6" r="13"/><circle cx="12" cy="-3" r="9"/></g>`).join('');
+  $('#wsG').setAttribute('viewBox',vb);$('#wsG').setAttribute('preserveAspectRatio','none');
+  $('#wsG').innerHTML=`<defs><linearGradient id="wgK" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="640"><stop offset="0" stop-color="#A9E2F4"/><stop offset="1" stop-color="#E8F8E6"/></linearGradient>
+    <linearGradient id="wgD" gradientUnits="userSpaceOnUse" x1="0" y1="252" x2="0" y2="640"><stop offset="0" stop-color="#8ED07A"/><stop offset="1" stop-color="#5E9E62"/></linearGradient></defs>
+    <rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="url(#wgK)"/>${clouds}${hills}
+    <rect x="${x0}" y="252" width="${w}" height="${Math.max(0,y1-252)}" fill="url(#wgD)"/>
+    <g fill="#C79A6B" stroke="#9C7148" stroke-width="1.5">${posts}</g>
+    <rect x="${x0}" y="232" width="${w}" height="5" fill="#C79A6B"/><rect x="${x0}" y="244" width="${w}" height="5" fill="#C79A6B"/>
+    <g fill="#6FBF5F">${tufts}</g><g fill="#7B5A3A" opacity=".35">${rows}</g>`;
 }
 addEventListener('resize',()=>fit());
 if(window.ResizeObserver)new ResizeObserver(()=>fit()).observe(app);
@@ -655,8 +691,7 @@ function stageClear(i,s){return new Promise(res=>{const c=h('div','clear',`<div 
 /* =================== START / BRIEFING =================== */
 function startScreen(){return new Promise(res=>{
   setHud(false);
-  const s=h('div','start',`<div class="rays"></div>
-    <div class="sTitle"><span class="chipM">🌱 Misi Berkebun</span><h1>Kebun <span>GROW</span></h1><p>Bantu Tika merawat bibit kopi sampai berbuah ya</p></div>
+  const s=h('div','start',`    <div class="sTitle"><span class="chipM">🌱 Misi Berkebun</span><h1>Kebun <span>GROW</span></h1><p>Bantu Tika merawat bibit kopi sampai berbuah ya</p></div>
     <img class="sTika" alt="Tika">
     <div class="sCard"><label>Halo!</label>
       <div class="sapa">${['Bapak','Ibu'].map(x=>`<button data-v="${x}">${x}</button>`).join('')}</div>
@@ -675,7 +710,7 @@ function startScreen(){return new Promise(res=>{
   $$('.sapa button',s).forEach(b=>b.onclick=()=>{S.sapa=b.dataset.v;$$('.sapa button',s).forEach(x=>x.classList.toggle('on',x===b));SFX.pop();upd()});
   inp.addEventListener('input',upd);
   const start=async()=>{const n=inp.value.trim().replace(/\s+/g,' ');if(!n||!S.sapa)return;S.name=n.slice(0,16);inp.blur();Snd.init();SFX.win();
-    await wipe(async()=>{s.remove();fit(true)});res()};
+    await wipe(async()=>{s.remove();setWorld('garden');fit(true)});res()};
   go.onclick=start;inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();start()}});
 })}
 
@@ -712,7 +747,7 @@ function debrief(){
     ['R','Reality','Apa yang sedang terjadi saat ini?','Memeriksa kondisi bibit sebelum merawat.'],
     ['O','Options','Pilihan apa yang mungkin?','Menumbuhkan banyak cabang ide, lalu memilih 2.'],
     ['W','Way Forward','Langkah apa yang akan dilakukan?','Menentukan mana yang dulu, kapan, dan PIC-nya.']];
-  const bd=h('div','backdrop','',ui);bd.animate([{opacity:0},{opacity:1}],{duration:300});
+  const bd=h('div','backdrop','',ui);bd.animate([{opacity:0},{opacity:1}],{duration:300});app.classList.add('dim');
   const show=(html,cls)=>{const c=h('div','card deb '+(cls||''),html,ui);
     c.animate([{opacity:0,transform:'translateY(60px) scale(.95)'},{opacity:1,transform:'none'}],{duration:600,easing:'cubic-bezier(.34,1.56,.64,1)'});
     [...c.children].forEach((e,i)=>e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:420,delay:220+i*80,fill:'backwards'}));return c};
