@@ -99,6 +99,7 @@ input{font-family:inherit;-webkit-user-select:text;user-select:text}
 .bt.sun{background:var(--sun);color:var(--ink);box-shadow:0 4px 0 #C58F00}
 .bt.wide{width:100%;height:48px;font-size:17px}
 .bt.pulse{animation:btp 1s ease-in-out infinite}
+.cfm{top:190px;padding:18px 16px;text-align:center;display:flex;flex-direction:column;gap:8px}.cfm h3{font:700 22px var(--fd);color:var(--gD)}.cfm p{font:800 13px/1.4 var(--fn);color:#4b4033}
 @keyframes btp{50%{transform:scale(1.06)}}
 .sv{width:100%;flex:1;min-height:0;display:block;touch-action:none}
 
@@ -202,6 +203,8 @@ input{font-family:inherit;-webkit-user-select:text;user-select:text}
 .gn.dn span{color:var(--g)}
 .gn.cur i{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,201,60,.45);animation:btp 1s ease-in-out infinite}
 .gn.cur span{color:#B07A00}
+.gn.lk i{filter:none;display:grid;place-items:center;border-style:dashed;background:#F4F6F5}.gn.lk i b{font:700 20px var(--fd);color:#B5C0B8}.gn.lk span{color:#B5C0B8}
+.dtk{flex:none;height:118px;width:auto;filter:drop-shadow(0 3px 0 rgba(0,0,0,.12))}.deb.d2{display:flex;flex-direction:column;justify-content:center}.deb.d2 .dtree{width:88px;height:106px}.deb.d2 .lead{font-size:12px;margin:8px 0 6px}.deb.d2 .two span{font-size:10.5px}.deb.d2 .own{font-size:11.5px}.deb.d2 .note{font-size:10.5px}
 .gpop p{font:800 12.5px/1.4 var(--fn);color:#4b4033;margin:2px 4px 10px}
 .gpop p b{color:var(--g)}
 /* pohon di debrief */
@@ -497,7 +500,7 @@ function growPopup(n){return new Promise(res=>{
   const c=h('div','gpop',`<span class="gchip">${n<4?'🌱 POHON KOPIMU TUMBUH!':'☕ POHON KOPIMU BERBUAH!'}</span>
     <div class="gstage"><div class="gr2"></div><div class="gt">${treeSVG(n-1)}</div></div>
     <div class="gname"><small>TAHAP ${n}/4 · HASIL LANGKAH ${GLET[n-1]}</small><b>${STAGE_N[n-1]} → <span class="nn">?</span></b></div>
-    <div class="gtrack"><div class="bar" style="width:0"></div>${STAGE_N.map((x,k)=>`<div class="gn${k<n?' dn':''}"><i>${treeSVG(k,'40 30 120 170')}</i><span>${x}</span></div>`).join('')}</div>
+    <div class="gtrack"><div class="bar" style="width:0"></div>${STAGE_N.map((x,k)=>`<div class="gn${k<n?' dn':' lk'}"><i>${k<n?treeSVG(k,'40 30 120 170'):'<b>?</b>'}</i><span>${k<n?x:'?'}</span></div>`).join('')}</div>
     <p>${fmt(GLINE[n-1])}</p>
     <button class="bt wide" disabled>Lanjut ▶</button>`,ui);
   const tr=$('.gtrack',c),bar=$('.bar',c),seg=k=>(tr.clientWidth-44)*k/4;
@@ -507,7 +510,7 @@ function growPopup(n){return new Promise(res=>{
     const st=$('.gstage',c);st.classList.add('lit');growIn($('.gt',c),n,true);SFX.grow();
     $('.nn',c).textContent=STAGE_N[n];$('.nn',c).animate([{transform:'scale(.3)',opacity:0},{transform:'scale(1.2)'},{transform:'scale(1)',opacity:1}],{duration:500});
     bar.style.width=seg(n)+'px';
-    const node=$$('.gn',c)[n];setTimeout(()=>{node.classList.add('dn','cur');SFX.ok()},600);
+    const node=$$('.gn',c)[n];setTimeout(()=>{const ni=$('i',node);ni.innerHTML=treeSVG(n,'40 30 120 170');$('span',node).textContent=STAGE_N[n];node.classList.remove('lk');node.classList.add('dn','cur');ni.animate([{transform:'scale(.3) rotate(-20deg)'},{transform:'scale(1.2)'},{transform:'none'}],{duration:500,easing:'ease-out'});SFX.ok()},600);
     const em=n<4?['✨','🍃','⭐','🌱']:['☕','✨','⭐','🍒'];
     for(let k=0;k<14;k++){const e=h('span','gspark',em[k%em.length],st);const a=Math.random()*Math.PI*2,d=70+Math.random()*50;
       e.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px)) scale(1)`,opacity:0}],{duration:1100+Math.random()*500,delay:Math.random()*200,easing:'cubic-bezier(.2,.7,.3,1)',fill:'backwards'}).onfinish=()=>e.remove()}
@@ -732,20 +735,26 @@ async function gameW(){
       else if(x.c==='s'){P.push(`${nm[k]}: "Siapa saja" artinya PIC tidak jelas.`);bad.add(k)}});
     const [a,b]=sel;
     if(hasD(a)&&hasD(b)){
-      if(a.d===b.d){P.push('Dua ide di hari yang sama? Kerjakan satu per satu.');bad.add(0);bad.add(1)}
+      if(a.d===b.d){if(a.c&&a.c===b.c&&a.c!=='s'){if(a.d!==0){P.push('Jangan ditunda! Mulai secepatnya, hari Senin.');bad.add(0);bad.add(1)}}else{P.push('Dua ide di hari yang sama? Kerjakan satu per satu.');bad.add(0);bad.add(1)}}
       else if(Math.min(a.d,b.d)!==0){P.push('Jangan ditunda! Mulai salah satu secepatnya, hari Senin.');bad.add(a.d<b.d?0:1)}}
-    if(a.c==='a'&&b.c==='a'){P.push('Semua dikerjakan sendiri? Bagi juga dengan rekan kerja.');bad.add(0);bad.add(1)}
-    else if(a.c==='r'&&b.c==='r'){P.push('Semua dilempar ke rekan kerja? Ambil juga bagianmu.');bad.add(0);bad.add(1)}
-    return{P,bad}};
+    if(a.c==='a'&&b.c==='a'&&!(hasD(a)&&hasD(b)&&a.d===b.d)){P.push('Semua dikerjakan sendiri? Bagi juga dengan rekan kerja.');bad.add(0);bad.add(1)}
+    else if(a.c==='r'&&b.c==='r'&&!(hasD(a)&&hasD(b)&&a.d===b.d)){P.push('Semua dilempar ke rekan kerja? Ambil juga bagianmu.');bad.add(0);bad.add(1)}
+    return{P,bad,same:hasD(a)&&hasD(b)&&a.d===b.d&&!!a.c&&a.c===b.c&&a.c!=='s'}};
+  const sure=()=>new Promise(r=>{hintOff();remark('Dua ide di hari yang sama, oleh orang yang sama. Yakin sanggup?','nod');
+    const bd=h('div','backdrop','',ui),c=h('div','card cfm','<div style="font-size:34px">🤔</div><h3>Yakin sanggup?</h3><p>Dua ide dikerjakan di hari yang sama oleh orang yang sama. Yakin bisa menyelesaikan keduanya?</p><button class="bt wide" id="yy">Iya, yakin 💪</button><button class="bt sun wide" id="nn">Tidak, pilih ulang</button>',ui);
+    bd.animate([{opacity:0},{opacity:1}],{duration:250});c.animate([{opacity:0,transform:'translateY(40px) scale(.95)'},{opacity:1,transform:'none'}],{duration:400,easing:'cubic-bezier(.34,1.56,.64,1)'});
+    const fin=v=>{SFX.tap();hintOff();c.remove();bd.remove();r(v)};$('#yy',c).onclick=()=>fin(true);$('#nn',c).onclick=()=>fin(false)});
   let tries=0;
   return new Promise(res=>{$('#rn').onclick=async()=>{const btn=$('#rn');btn.disabled=true;hintOff();$$('.tk',panel).forEach(t=>t.classList.remove('ok','err'));
-    const {P:prob,bad}=check();let done=0;const tree=$('#tree');tree.classList.remove('wilt');$('#pl').textContent='🌱';
+    const {P:prob,bad,same}=check();
+    if(!prob.length&&same&&!(await sure())){sel.forEach(x=>{x.d=null;x.c=null});$$('.chip.on',panel).forEach(c=>c.classList.remove('on'));remark('Oke, silakan pilih ulang hari dan PIC-nya.','nod');btn.disabled=false;nextHint();return}
+    let done=0;const tree=$('#tree');tree.classList.remove('wilt');$('#pl').textContent='🌱';
     for(let d=0;d<5;d++){$$('#wk span').forEach((e,k)=>e.classList.toggle('on',k===d));SFX.tick();
       TK.forEach((t,i)=>{if(sel[i].d===d){const blk=$(`.tk[data-i="${i}"]`);if(bad.has(i)){blk.classList.add('err');floatAt(blk,'✗','#E5533D');SFX.no()}else{blk.classList.add('ok');done++;floatAt(blk,'✓ beres','#16995c');SFX.ok()}}});
       $('#pl').textContent=['🌱','🪴','🌳'][done];await sleep(600)}
     $$('#wk span').forEach(e=>e.classList.remove('on'));
     bad.forEach(i=>$(`.tk[data-i="${i}"]`).classList.add('err'));
-    if(!prob.length){$('#pl').textContent='🌳';msg('Dimulai secepatnya, satu per satu, dan tugas terbagi. Pohonmu berbuah! ☕',1);tika('jump');await sleep(1200);res(st3(tries,0,1))}
+    if(!prob.length){$('#pl').textContent='🌳';msg(same?'Dimulai secepatnya dan PIC-nya jelas. Semangat! Pohonmu berbuah! ☕':'Dimulai secepatnya, satu per satu, dan tugas terbagi. Pohonmu berbuah! ☕',1);tika('jump');await sleep(1200);res(st3(tries,0,1))}
     else{tries++;SFX.no();$('#pl').textContent='🥀';tree.classList.add('wilt');tika('sad');msg(prob[0],0);remark('Yah, pohonnya layu. Lihat ide yang merah, perbaiki, lalu jalankan lagi.');btn.disabled=false;
       setTimeout(()=>{tree.classList.remove('wilt');tika('')},1600);
       hintLater(()=>{const i=[...bad][0];const blk=$(`.tk[data-i="${i}"]`);if(blk)hintTap($$('.chips',blk)[0].children[1])},1400)}}});
@@ -817,42 +826,23 @@ function sendComplete(){try{
     window.top.postMessage("scoreBarFound", "*");
   }catch(e){}}
 function debrief(){
-  const tot=S.stars.reduce((a,b)=>a+b,0);setHud(false);hideBub();
-  const R=[['G','Goal','Apa tujuan yang ingin dicapai?','Mengarahkan cahaya ke tanaman 🎯.'],
-    ['R','Reality','Apa yang sedang terjadi saat ini?','Memeriksa kondisi bibit sebelum merawat.'],
-    ['O','Options','Pilihan apa yang mungkin?','Menumbuhkan banyak cabang ide, lalu memilih 2.'],
-    ['W','Way Forward','Langkah apa yang akan dilakukan?','Menentukan mana yang dulu, kapan, dan PIC-nya.']];
+  setHud(false);hideBub();
   const bd=h('div','backdrop','',ui);bd.animate([{opacity:0},{opacity:1}],{duration:300});app.classList.add('dim');
-  const show=(html,cls)=>{const c=h('div','card deb '+(cls||''),html,ui);
-    c.animate([{opacity:0,transform:'translateY(60px) scale(.95)'},{opacity:1,transform:'none'}],{duration:600,easing:'cubic-bezier(.34,1.56,.64,1)'});
-    [...c.children].forEach((e,i)=>e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:420,delay:220+i*80,fill:'backwards'}));return c};
-  const c1=show(`<div class="top"><div class="dtree">${treeSVG(4,'34 14 132 188')}<span class="sp" style="left:2px;top:4px">✨</span><span class="sp" style="right:2px;top:30px;animation-delay:-1s">☕</span></div><div style="flex:1;min-width:0"><span class="chipM">✓ KEBUN SELESAI</span><h2>Hebat, ${esc(P())}!</h2><div class="dsub">Pohon kopimu sudah berbuah ☕</div>
-    <div class="score"><b>⭐ ${tot}/12</b><div class="tr"><i></i></div></div></div></div>
-    <div class="lead">Pola yang tadi kamu mainkan disebut model <b>GROW</b>. Pola ini membantu tim memahami:</div>
-    <div class="gr">${R.map((r,i)=>`<div><span class="L">${r[0]}</span><div style="flex:1"><h4>${r[1]}<small>${'⭐'.repeat(S.stars[i])}${'☆'.repeat(3-S.stars[i])}</small></h4><p><em>Pertanyaan:</em> ${r[2]}<br><em>Di kebun:</em> ${r[3]}</p></div></div>`).join('')}</div>
-    <div class="quote">Dengan GROW, tim diberi kesempatan <b>ikut memikirkan</b> kondisi kerjaan dan cara memperbaikinya untuk meningkatkan kinerja.</div>
-    <button class="bt wide" id="nx2">Lanjut ▶</button>`);
-  setTimeout(()=>{$('.score .tr i',c1).style.width=(tot/12*100)+'%'},50);
+  const c=h('div','card deb d2',`<div class="top"><img class="dtk" src="${IMG}" alt="Tika"><div style="flex:1;min-width:0;text-align:center"><span class="chipM">✓ KEBUN SELESAI</span><h2>Hebat, ${esc(P())}!</h2><div class="dsub">Pohon kopimu sudah berbuah ☕</div></div><div class="dtree">${treeSVG(4,'34 14 132 188')}<span class="sp" style="left:2px;top:4px">✨</span><span class="sp" style="right:2px;top:30px;animation-delay:-1s">☕</span></div></div>
+    <div class="lead">Pola yang tadi kamu mainkan disebut <b>GROW</b>. Tapi baca dulu kebutuhan tim:</div>
+    <div class="two">
+      <div class="t1"><i>🧑‍🏫</i><small>Belum tahu / belum bisa</small><b>Ajarkan atau tunjukkan dulu</b><span>Gap-nya ada di pengetahuan atau keterampilan.</span></div>
+      <div class="t2"><i>🌱</i><small>Sudah punya bekal</small><b>Bantu berpikir dengan GROW</b><span>Perlu dibantu mengurai masalah dan menentukan langkah.</span></div>
+    </div>
+    <div class="own">Membantu tim berpikir memberi mereka kesempatan membangun <b>ownership</b>: rasa memiliki sekaligus tanggung jawab atas pekerjaan yang dipegang.</div>
+    <div class="note">Ingat: GROW bukan alasan menolak memberi jawaban, dan bukan untuk menguji orang yang memang belum tahu.</div>
+    <div class="sub" style="margin:8px 0 0">Sampai ketemu di misi berikutnya! 👋</div>
+    <button class="bt wide" id="again">↺ Ulangi Gamifikasi</button>`,ui);
+  c.animate([{opacity:0,transform:'translateY(60px) scale(.95)'},{opacity:1,transform:'none'}],{duration:600,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  [...c.children].forEach((e,k)=>e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:420,delay:220+k*80,fill:'backwards'}));
   setTimeout(()=>{SFX.win();burst(40)},500);
-  hintLater(()=>hintTap($('#nx2')),4000);
-  $('#nx2').onclick=async()=>{hintOff();SFX.tap();
-    await c1.animate([{opacity:1},{opacity:0,transform:'translateX(-40px)'}],{duration:260,fill:'forwards'}).finished.catch(()=>{});c1.remove();
-    show(`<span class="chipM">💡 SATU HAL PENTING</span>
-      <h3>Sebelum pakai GROW, pastikan dulu pemahaman tim</h3>
-      <div class="sub">Coaching bukan berarti leader menahan semua jawaban. Baca dulu kebutuhannya:</div>
-      <div class="two">
-        <div class="t1"><i>🧑‍🏫</i><small>Belum tahu / belum bisa</small><b>Ajarkan atau tunjukkan dulu</b><span>Gap-nya ada di pengetahuan atau keterampilan.</span></div>
-        <div class="t2"><i>🌱</i><small>Sudah punya bekal</small><b>Bantu berpikir dengan GROW</b><span>Perlu dibantu mengurai masalah dan menentukan langkah.</span></div>
-      </div>
-      <div class="lbl2">RUTINITAS KEPUTUSAN</div>
-      <div class="flow"><div>Baca kebutuhannya</div><em>›</em><div>Tentukan respons</div><em>›</em><div>Bantu berpikir</div><em>›</em><div>Sepakati langkah</div></div>
-      <div class="own">Kenapa penting? Membantu tim berpikir memberi mereka kesempatan membangun <b>ownership</b>: Rasa memiliki sekaligus tanggung jawab atas pekerjaan yang sedang dipegang.</div>
-      <div class="note">Ingat: GROW bukan alasan menolak memberi jawaban, dan bukan untuk menguji orang yang memang belum tahu.</div>
-      <div class="sub" style="margin:8px 0 0">Sampai ketemu di misi berikutnya! 👋</div>
-      <button class="bt wide" id="again">↺ Ulangi Gamifikasi</button>`,'d2');
-    sendComplete();
-    $('#again').onclick=()=>{SFX.tap();location.reload()};
-  };
+  sendComplete();
+  $('#again').onclick=()=>{SFX.tap();location.reload()};
 }
 
 /* =================== ALUR UTAMA =================== */
@@ -883,7 +873,7 @@ async function main(){
   }
   setLetters(4);setStage('Kebun Selesai','POHON: BERBUAH');
   await say('Lihat, {p}! Pohon kopinya berbuah. Kamu merawatnya dari awal sampai akhir.','jump');
-  await say('Sebelum pulang, yuk lihat apa arti 4 langkah tadi.','nod');
+  await say('Sebelum pulang, ada satu hal penting yang perlu diingat.','nod');
   await wipe(async()=>{hideBub()});
   debrief();
 }
