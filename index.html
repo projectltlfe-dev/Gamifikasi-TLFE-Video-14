@@ -761,7 +761,7 @@ async function gameW(){
 }
 
 /* ---------- kartu selesai tahap ---------- */
-const INS=[['G','Goal','Apa tujuan yang ingin dicapai?','Sebelum merawat, kamu mengarahkan cahaya ke tanaman 🎯 dulu. Dalam coaching, tim diajak **berpikir apa yang ingin dicapai**. Ini disebut **menetapkan Goal**.'],
+const INS=[['G','Goal','Apa tujuan yang ingin dicapai?','Sebelum merawat, kamu mengarahkan cahaya ke tanaman dulu. Dalam coaching, tim diajak **berpikir apa yang ingin dicapai**. Ini disebut **menetapkan Goal**.'],
   ['R','Reality','Apa yang sedang terjadi saat ini?','Kamu memeriksa kondisi bibit sebelum bertindak. Ini namanya **Reality Check**: Mengajak tim **sadar dan melihat kondisi** yang terjadi sekarang.'],
   ['O','Options','Pilihan apa yang mungkin?','Kamu menumbuhkan banyak cabang ide sebelum memilih. Leader **memancing tim ikut berpikir** dengan bertanya: "Menurut kamu, pilihan-pilihan apa yang bisa jadi solusinya?"'],
   ['W','Way Forward','Langkah apa yang akan dilakukan?','Kamu menentukan ide mana yang dikerjakan dulu, kapan, dan siapa PIC-nya. Supaya pilihan **tidak cuma berhenti jadi obrolan**, tentukan **langkah lanjutan**.']];
@@ -829,13 +829,12 @@ function debrief(){
   setHud(false);hideBub();
   const bd=h('div','backdrop','',ui);bd.animate([{opacity:0},{opacity:1}],{duration:300});app.classList.add('dim');
   const c=h('div','card deb d2',`<div class="top"><img class="dtk" src="${IMG}" alt="Tika"><div style="flex:1;min-width:0;text-align:center"><span class="chipM">✓ KEBUN SELESAI</span><h2>Hebat, ${esc(P())}!</h2><div class="dsub">Pohon kopimu sudah berbuah ☕</div></div><div class="dtree">${treeSVG(4,'34 14 132 188')}<span class="sp" style="left:2px;top:4px">✨</span><span class="sp" style="right:2px;top:30px;animation-delay:-1s">☕</span></div></div>
-    <div class="lead">Pola yang tadi kamu mainkan disebut <b>GROW</b>. Tapi baca dulu kebutuhan tim:</div>
+    <div class="lead">Pola yang tadi kamu mainkan disebut <b>GROW</b>. <br>Baca dulu kebutuhan tim:</div>
     <div class="two">
-      <div class="t1"><i>🧑‍🏫</i><small>Belum tahu / belum bisa</small><b>Ajarkan atau tunjukkan dulu</b><span>Gap-nya ada di pengetahuan atau keterampilan.</span></div>
-      <div class="t2"><i>🌱</i><small>Sudah punya bekal</small><b>Bantu berpikir dengan GROW</b><span>Perlu dibantu mengurai masalah dan menentukan langkah.</span></div>
+      <div class="t1"><i>🧑‍🏫</i><small>Belum tahu / belum bisa</small><b>Ajarkan atau tunjukkan dulu caranya</b><span>Gap-nya ada di pengetahuan atau keterampilannya.</span></div>
+      <div class="t2"><i>🌱</i><small>Sudah tahu / sudah bisa</small><b>Bantu berpikir dengan GROW</b><span>Perlu dibantu dalam menguraikan masalah dan menentukan langkah selanjutnya.</span></div>
     </div>
-    <div class="own">Membantu tim berpikir memberi mereka kesempatan membangun <b>ownership</b>: rasa memiliki sekaligus tanggung jawab atas pekerjaan yang dipegang.</div>
-    <div class="note">Ingat: GROW bukan alasan menolak memberi jawaban, dan bukan untuk menguji orang yang memang belum tahu.</div>
+    <div class="own">Membantu tim berpikir memberi mereka kesempatan untuk membangun sikap <b>ownership</b>, yaitu rasa memiliki sekaligus tanggung jawab atas pekerjaan yang dipegang.</div>
     <div class="sub" style="margin:8px 0 0">Sampai ketemu di misi berikutnya! 👋</div>
     <button class="bt wide" id="again">↺ Ulangi Gamifikasi</button>`,ui);
   c.animate([{opacity:0,transform:'translateY(60px) scale(.95)'},{opacity:1,transform:'none'}],{duration:600,easing:'cubic-bezier(.34,1.56,.64,1)'});
@@ -846,7 +845,7 @@ function debrief(){
 }
 
 /* =================== ALUR UTAMA =================== */
-const CHAP=[['Arahkan Cahaya','TANTANGAN 1 · GOAL','Tantangan pertama: Tanaman butuh cahaya yang **tepat sasaran**. Kita pakai cermin untuk mengarahkannya.'],
+const CHAP=[['Arahkan Cahaya','TANTANGAN 1 · GOAL','Tantangan pertama: Tanaman butuh cahaya yang **tepat sasaran**. Bantu Tika untuk mengarahkan cahayanya pakai cermin ya.'],
   ['Periksa Bibit','TANTANGAN 2 · REALITY','Tantangan kedua: Kenali **kondisi sebenarnya** bibit kita sebelum merawatnya.'],
   ['Tumbuhkan Ide','TANTANGAN 3 · OPTIONS','Menurut {p}, **pilihan-pilihan apa** yang bisa jadi solusinya? Tumbuhkan sebanyak mungkin, lalu pilih 2.'],
   ['Susun Rencana','TANTANGAN 4 · WAY FORWARD','Dari 2 pilihan tadi, **mana yang mau dilakukan dulu**? Yuk susun jadwalnya supaya tidak berhenti jadi obrolan.']];
@@ -856,7 +855,7 @@ async function main(){
   buildScene();setHud(true);setLetters(-1);setStage('Kebun GROW','PERSIAPAN');
   $('#tika').animate([{transform:'translateX(-130%)'},{transform:'translateX(6%)',offset:.75},{transform:'none'}],{duration:800,easing:'cubic-bezier(.22,1,.36,1)'});
   await sleep(700);
-  await say('Halo, {p}! Saya **Tika**. Selamat datang di kebun kita.','jump');
+  await say('Halo, {p}! Selamat datang, saya **Tika**.','jump');
   await say('Bantu Tika merawat bibit kopi ini sampai **berbuah** ya.','nod');
   for(let i=0;i<4;i++){
     setLetters(i);setStage(CHAP[i][0],CHAP[i][1]+' · POHON: '+NAMES[i].toUpperCase());
@@ -866,14 +865,14 @@ async function main(){
     const s=await GAMES[i]();hintOff();
     S.stars[i]=s;addStars();
     await growPopup(i+1);
-    grow(i+1,true);SFX.grow();burst(18);remark(i<3?`Mantap, {p}! Pohonnya sekarang sudah **${STAGE_N[i+1].toLowerCase()}**. 🌱`:'Pohon kopimu **berbuah**! ☕','jump');
+    grow(i+1,true);SFX.grow();burst(18);remark(i<3?`Mantap, {p}! Bibitnya sekarang sudah tumbuh **${STAGE_N[i+1].toLowerCase()}**. 🌱`:'Pohon kopimu **berbuah**! ☕','jump');
     await sleep(900);
     await stageClear(i,s);
     closePanel();await sleep(350);
   }
   setLetters(4);setStage('Kebun Selesai','POHON: BERBUAH');
-  await say('Lihat, {p}! Pohon kopinya berbuah. Kamu merawatnya dari awal sampai akhir.','jump');
-  await say('Sebelum pulang, ada satu hal penting yang perlu diingat.','nod');
+  await say('Lihat, {p}! Pohon kopinya berbuah. Kamu berhasil merawatnya dari awal sampai akhir.','jump');
+  await say('Sebelum selesai, yuk kita ulas kembali inti dari permainannya.','nod');
   await wipe(async()=>{hideBub()});
   debrief();
 }
