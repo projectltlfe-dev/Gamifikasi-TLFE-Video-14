@@ -617,7 +617,7 @@ async function gameG(){
   svg.addEventListener('pointermove',e=>{if(drag)setFrom(e)});
   svg.addEventListener('pointerup',()=>drag=false);svg.addEventListener('pointercancel',()=>drag=false);
   const showHintArc=()=>{const r=rectStage(svg),k=r.w/344;hintArc(r.x+M[0]*k,r.y+M[1]*k,52*k,-40,60)};
-  const lines=['Tujuan pertama: tanaman bertanda 🎯 di bawah. Arahkan cahayanya ke sana!','Tujuannya pindah! Lihat dulu tanda 🎯, baru bidik.','Satu lagi. Bidik pelan-pelan, {p}.'];
+  const lines=['Tujuan pertama: Tanaman bertanda 🎯 di bawah. Arahkan cahayanya ke sana!','Tujuannya pindah! Lihat dulu tanda 🎯, baru bidik.','Satu lagi. Bidik pelan-pelan, {p}.'];
   for(let rd=0;rd<3;rd++){
     const gi=ROUNDS[rd];$('#cn').textContent=`🎯 ${rd+1}/3`;
     $$('.pot',svg).forEach((g,i)=>{g.classList.toggle('tgt',i===gi);g.classList.remove('lit')});
